@@ -15,16 +15,17 @@
 
 int serviceClient(int new_sock)
 {
-    char *word;
-    /* Read word to be searched from client */
-    // dup2(new_sock, 1);
-    while(!strcmp("quit", word)){
-        if (read(new_sock, word, 255)<0){
+    while(1){
+    char word[SIZE];
+        /* Read word to be searched from client */
+        dup2(new_sock, 1);
+        if (read(new_sock, word, sizeof(word))<0){
             printf("read() error\n");
             exit(3); 
         }
-        // execl("/bin/sh", "sh", "-c", word, (char *) NULL);
-        printf("Word received from client: %s\n", word);
+        
+        system(word);
+        // printf("Word received from client: %s\n", word);
     }
 }
 
@@ -94,8 +95,11 @@ int main(){
         // else
         //     new_sock = accept(sockfdB, (struct sockaddr*)&new_addr, &addr_size);
         printf("\nGot a client\n");
-        if(!fork())
+        printf("%d",new_sock);
+        if(!fork()){
+            printf("Forking");
             serviceClient(new_sock);
+        }
         close(new_sock);
     }
     

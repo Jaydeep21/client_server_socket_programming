@@ -14,7 +14,6 @@
 #define SIZE 1024
 
 int main(int argc, char *argv[]){
-    char message[1000];
     char *ip = "127.0.0.1";
     int port = 8080;
     int e;
@@ -45,19 +44,22 @@ int main(int argc, char *argv[]){
 
     // dup2(sockfd, 1);
     while (1) {
+        bzero(buffer, SIZE);
+        bzero(input, SIZE);
+
         printf("chat> ");
         gets(input);
-        send(sockfd, input, sizeof(input), 0);
+        write(sockfd, input, sizeof(input));
+        printf("Sent");
         if (strcmp(input, "quit") == 0)
         {
             close(sockfd);
             exit(0);
         }
-        n = recv(sockfd, buffer, SIZE, 0);
+        n = read(sockfd, buffer, sizeof(buffer));
         printf("Rec size: %d\n",n);
         printf(buffer);
-        bzero(buffer, SIZE);
-        bzero(input, SIZE);
+
     }
     return 1;
 }
