@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         printf("chat> ");
         gets(input);
         write(sockfd, input, sizeof(input));
-        printf("Sent");
+        // printf("Sent");
         if (strcmp(input, "quit") == 0)
         {
             close(sockfd);

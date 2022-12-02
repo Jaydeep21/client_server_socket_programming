@@ -23,7 +23,12 @@ int serviceClient(int new_sock)
             printf("read() error\n");
             exit(3); 
         }
-        
+        if (strcmp("quit", word) == 0)
+        {
+            printf("Client disconnected");
+            close(new_sock); 
+            kill(getpid(), SIGKILL);
+        }
         system(word);
         // printf("Word received from client: %s\n", word);
     }
@@ -66,7 +71,7 @@ int main(){
     //     perror("Error in bind B");
     //     exit(1);
     // }
-    printf("Binding successfull.\n");
+    printf("Binding successful.\n");
 
     if(listen(sockfdA, 10) == 0){
 	}   
@@ -97,7 +102,7 @@ int main(){
         printf("\nGot a client\n");
         printf("%d",new_sock);
         if(!fork()){
-            printf("Forking");
+            // printf("Forking");
             serviceClient(new_sock);
         }
         close(new_sock);
