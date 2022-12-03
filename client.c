@@ -48,18 +48,20 @@ int main(int argc, char *argv[]){
         bzero(input, SIZE);
 
         printf("chat> ");
-        gets(input);
+        fgets(input, sizeof(input), stdin);
+        // gets(input);
         write(sockfd, input, sizeof(input));
         // printf("Sent");
-        if (strcmp(input, "quit") == 0)
+        sleep(1);
+        if (strncmp("quit", input, 4) == 0)
+        // if (strcmp(input, "quit") == 0)
         {
             close(sockfd);
             exit(0);
         }
-        sleep(1);
         n = read(sockfd, buffer, sizeof(buffer));
-        printf("Rec size: %d\n",n);
-        printf(buffer);
+        // printf("Rec size: %d\n",n);
+        printf("%s", buffer);
 
     }
     return 1;
