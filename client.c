@@ -56,6 +56,7 @@ int main(int argc, char *argv[]){
             close(sockfd);
             exit(0);
         }
+        sleep(1);
         n = read(sockfd, buffer, sizeof(buffer));
         printf("Rec size: %d\n",n);
         printf(buffer);

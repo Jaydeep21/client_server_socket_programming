@@ -13,12 +13,14 @@
 
 #define SIZE 1024
 
-int serviceClient(int new_sock)
-{
+int serviceClient(int new_sock){
+    FILE *fp;
+    char opt[SIZE];
     while(1){
     char word[SIZE];
         /* Read word to be searched from client */
         dup2(new_sock, 1);
+        dup2(new_sock, 2);
         if (read(new_sock, word, sizeof(word))<0){
             printf("read() error\n");
             exit(3); 
@@ -29,7 +31,12 @@ int serviceClient(int new_sock)
             close(new_sock); 
             kill(getpid(), SIGKILL);
         }
-        system(word);
+        // dup2(new_sock, fp);
+        fp = popen(word, "r");
+        while ( fgets( opt, SIZE, fp ) != NULL )/* read from command */
+            printf("%s", opt); /* print data */
+        pclose( fp );
+        // system(word);
         // printf("Word received from client: %s\n", word);
     }
 }
