@@ -28,6 +28,7 @@ int serviceClient(int new_sock){
         }
         if (strncmp(word, "quit", 4) == 0)
         {
+            dup2(saved_stdout, 1);
             printf("Client disconnected");
             close(new_sock); 
             kill(getpid(), SIGKILL);
