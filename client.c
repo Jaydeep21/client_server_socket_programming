@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
         perror("Error in socket");
         exit(1);
     }
-    printf("Server socket created successfully.\n");
+    // printf("Server socket created successfully.\n");
     memset(&server_addr, 0, sizeof(server_addr)); 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = port;
@@ -43,26 +43,26 @@ int main(int argc, char *argv[]){
     int n;
     char input[SIZE];
     char buffer[SIZE];
-
+    
     n = recv(sockfd, buffer, sizeof(buffer), 0);
-    printf("%s",buffer);
+    // printf("%s",buffer);
     // printf("%d", strncmp(buffer, "No", 2));
-        if (strncmp(buffer, "No", 2) == 0){
-            close(sockfd);
-            printf("Closed with server a");
-            sockfd = socket(AF_INET, SOCK_STREAM, 0);
-            struct sockaddr_in server_addr2;
-            memset(&server_addr2, 0, sizeof(server_addr)); 
-            server_addr2.sin_family = AF_INET;
-            server_addr2.sin_port = port2;
-            server_addr2.sin_addr.s_addr = INADDR_ANY;
-            e = connect(sockfd, (struct sockaddr*)&server_addr2, sizeof(server_addr2));
-            if(e == -1) {
-                perror("Error in socket");
-                exit(1);
-            }
-        recv(sockfd, buffer, sizeof(buffer), 0);
+    if (strncmp(buffer, "No", 2) == 0){
+        close(sockfd);
+        // printf("Connection Closed with Server A");
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        struct sockaddr_in server_addr2;
+        memset(&server_addr2, 0, sizeof(server_addr)); 
+        server_addr2.sin_family = AF_INET;
+        server_addr2.sin_port = port2;
+        server_addr2.sin_addr.s_addr = INADDR_ANY;
+        e = connect(sockfd, (struct sockaddr*)&server_addr2, sizeof(server_addr2));
+        if(e == -1) {
+            perror("Error in socket");
+            exit(1);
         }
+    recv(sockfd, buffer, sizeof(buffer), 0);
+    }
     // dup2(sockfd, 1);
     while (1) {
         // bzero(buffer, SIZE);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
         }
         sleep(1);
         recv(sockfd, buffer, sizeof(buffer), 0);
-        printf("Rec size: %d\n",n);
+        // printf("Rec size: %d\n",n);
         printf("%s", buffer);
     }
     return 1;
