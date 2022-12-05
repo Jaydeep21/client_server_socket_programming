@@ -14,39 +14,37 @@
 #define SIZE 1024
 
 int serviceClient(int new_sock){
-    FILE *fp;
     char opt[SIZE];
-    while(1){
+    dup2(new_sock, 0);
+    dup2(new_sock, 1);
+    dup2(new_sock, 2);
     char word[SIZE];
-        /* Read word to be searched from client */
-        dup2(new_sock, 1);
-        dup2(new_sock, 2);
-        if (read(new_sock, word, sizeof(word))<0){
+    while(1){
+        bzero(word, SIZE);
+        bzero(opt, SIZE);
+        if (read(0, word, sizeof(word))<0){
             printf("read() error\n");
             exit(3); 
         }
-        if (strcmp("quit", word) == 0)
+        if (strncmp(word, "quit", 4) == 0)
         {
             printf("Client disconnected");
             close(new_sock); 
             kill(getpid(), SIGKILL);
+            exit(0);
         }
-        // dup2(new_sock, fp);
-        fp = popen(word, "r");
-        while ( fgets( opt, SIZE, fp ) != NULL )/* read from command */
-            printf("%s", opt); /* print data */
-        pclose( fp );
-        // system(word);
-        // printf("Word received from client: %s\n", word);
+        
+        system(word);
     }
 }
 
 
 int main(){
-    char *ip = "127.0.0.1";
-    int port = 8080;
-    int eA, eB, count;
-
+    // char *ip = "127.0.0.1";
+    int portA = htons(8080);
+    int portB = htons(8081);
+    int eA, eB, count = 0;
+    int flag = 0;
     int sockfdA, sockfdB, new_sock;
     struct sockaddr_in server_addr, new_addr;
     socklen_t addr_size;
@@ -65,54 +63,94 @@ int main(){
     printf("Server socket created successfully.\n");
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = port;
-    server_addr.sin_addr.s_addr = inet_addr(ip);
+    server_addr.sin_port = portA;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
 
     eA = bind(sockfdA, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    // eB = bind(sockfdB, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    // 
     if(eA < 0) {
-        perror("Error in bind A");
-        exit(1);
+        server_addr.sin_port = portB;
+    // int optval = 1;
+    // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof(optval));
+    // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+        flag = 1;
+        eB = bind(sockfdB, (struct sockaddr*)&server_addr, sizeof(server_addr));
+        printf("Binding successful with server B.\n");
+        if(listen(sockfdB, 5) == 0){
+        }   
+        else{
+            perror("Error in listening B");
+            exit(1);
+        }
+    }else{
+        printf("Binding successful with server A.\n");
+        
     }
-    // if(eB < 0) {
-    //     perror("Error in bind B");
-    //     exit(1);
-    // }
-    printf("Binding successful.\n");
-
-    if(listen(sockfdA, 10) == 0){
-	}   
-    else{
-		perror("Error in listening A");
-        exit(1);
-	}
-
-    // if(listen(sockfdB, 10) == 0){
-	// }   
-    // else{
-	// 	perror("Error in listening B");
-    //     exit(1);
-	// }
+    if(listen(sockfdA, 20) == 0){
+        }   
+        else{
+            perror("Error in listening A");
+            exit(1);
+        }
+    if(listen(sockfdB, 20) == 0){
+        }   
+        else{
+            perror("Error in listening B");
+            exit(1);
+        }
     addr_size = sizeof(new_addr);
 
-    while(1)
-    {
-        // count++;
-        // if(count>=1 && count<=5)
-            new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
-        // else if(count>=6 && count<=10)
-        //     new_sock = accept(sockfdB, (struct sockaddr*)&new_addr, &addr_size);
-        // else if(count % 2 == 1)
-        //     new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
-        // else
-        //     new_sock = accept(sockfdB, (struct sockaddr*)&new_addr, &addr_size);
-        printf("\nGot a client\n");
-        printf("%d",new_sock);
-        if(!fork()){
-            // printf("Forking");
-            serviceClient(new_sock);
+    if (flag==0){
+        while(1)
+        {   
+
+            count++;
+            if(count>=1 && count<=5) {
+                printf("Server A 1 %d\n", count);
+                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
+                send(new_sock, "Welcome", sizeof("Welcome"), 0);
+            }
+            else if(count>=6 && count<=10){
+                printf("Server B 1 %d\n", count);
+                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
+                send(new_sock, "No", sizeof("No"), 0);
+                sleep(1);
+                close(new_sock);
+                printf("closed\n");
+                continue;
+            }
+            else if(count % 2 == 1){
+                printf("Server A 2 %d\n", count);
+                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
+                send(new_sock, "Welcome", sizeof("Welcome"), 0);
+            }
+            else{
+                printf("Server B 2 %d\n", count);
+                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
+                send(new_sock, "No", sizeof("No"), 0);
+                sleep(1);
+                close(new_sock);
+                printf("closed\n");
+                continue;
+            }
+            printf("\nGot a client\n");
+            printf("%d",new_sock);
+            if(!fork()){
+                serviceClient(new_sock);
+            }
+            close(new_sock);
+        }  
         }
-        close(new_sock);
+    else{
+        while(1){
+            new_sock = accept(sockfdB, (struct sockaddr*)&new_addr, &addr_size);
+            send(new_sock, "Welcome", sizeof("Welcome"), 0);
+            printf("\nGot a client\n");
+            print.f("%d",new_sock);
+            if(!fork()){
+                serviceClient(new_sock);
+            }
+            close(new_sock);
+        }
     }
-    
 }
