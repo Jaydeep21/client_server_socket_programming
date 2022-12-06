@@ -40,6 +40,7 @@ int serviceClient(int new_sock){
         // while ( fgets( opt, SIZE, fp ) != NULL )/* read from command */
         //     printf("%s", opt); /* print data */
         // pclose( fp );
+        printf("Output for the command %s\n", word);
         system(word);
     }
 }
