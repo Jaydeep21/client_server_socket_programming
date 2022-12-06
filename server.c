@@ -14,6 +14,7 @@
 #define SIZE 1024
 
 int serviceClient(int new_sock){
+    // FILE *fp;
     char opt[SIZE];
     int saved_stdout = dup(1);
     dup2(new_sock, 0);
@@ -35,6 +36,10 @@ int serviceClient(int new_sock){
             // kill(getpid(), SIGKILL);
             exit(0);
         }
+        // fp = popen(word, "r");
+        // while ( fgets( opt, SIZE, fp ) != NULL )/* read from command */
+        //     printf("%s", opt); /* print data */
+        // pclose( fp );
         system(word);
     }
 }
