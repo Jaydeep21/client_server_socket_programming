@@ -35,11 +35,9 @@ int serviceClient(int new_sock){
             // kill(getpid(), SIGKILL);
             exit(0);
         }
-        
         system(word);
     }
 }
-
 
 int main(){
     // char *ip = "127.0.0.1";
@@ -69,12 +67,12 @@ int main(){
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
     eA = bind(sockfdA, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    // 
+
     if(eA < 0) {
         server_addr.sin_port = portB;
-    // int optval = 1;
-    // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof(optval));
-    // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+        // int optval = 1;
+        // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof(optval));
+        // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
         flag = 1;
         eB = bind(sockfdB, (struct sockaddr*)&server_addr, sizeof(server_addr));
         printf("Binding successful with server B.\n");
@@ -84,22 +82,23 @@ int main(){
             perror("Error in listening B");
             exit(1);
         }
-    }else{
+    }
+    else{
         printf("Binding successful with server A.\n");
         
     }
     if(listen(sockfdA, 20) == 0){
         }   
-        else{
-            perror("Error in listening A");
-            exit(1);
-        }
+    else{
+        perror("Error in listening A");
+        exit(1);
+    }
     if(listen(sockfdB, 20) == 0){
-        }   
-        else{
-            perror("Error in listening B");
-            exit(1);
-        }
+    }   
+    else{
+        perror("Error in listening B");
+        exit(1);
+    }
     addr_size = sizeof(new_addr);
 
     if (flag==0){

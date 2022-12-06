@@ -39,14 +39,12 @@ int main(int argc, char *argv[]){
     }
 	printf("Connected to Server.\n");
     
-    /* Receive final data from server and display on screen */
     int n;
     char input[SIZE];
     char buffer[SIZE];
     
     n = recv(sockfd, buffer, sizeof(buffer), 0);
     // printf("%s",buffer);
-    // printf("%d", strncmp(buffer, "No", 2));
     if (strncmp(buffer, "No", 2) == 0){
         close(sockfd);
         // printf("Connection Closed with Server A");
@@ -63,10 +61,7 @@ int main(int argc, char *argv[]){
         }
     recv(sockfd, buffer, sizeof(buffer), 0);
     }
-    // dup2(sockfd, 1);
     while (1) {
-        // bzero(buffer, SIZE);
-        // bzero(input, SIZE);
         memset(buffer, 0, SIZE);
         memset(input, 0, SIZE);
         
@@ -80,7 +75,6 @@ int main(int argc, char *argv[]){
         }
         sleep(1);
         recv(sockfd, buffer, sizeof(buffer), 0);
-        // printf("Rec size: %d\n",n);
         printf("%s", buffer);
     }
     return 1;
