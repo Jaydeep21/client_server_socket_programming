@@ -14,7 +14,6 @@
 #define SIZE 1024
 
 int serviceClient(int new_sock){
-    // FILE *fp;
     char opt[SIZE];
     int saved_stdout = dup(1);
     dup2(new_sock, 0);
@@ -33,20 +32,16 @@ int serviceClient(int new_sock){
             dup2(saved_stdout, 1);
             printf("Client Disconnected\n\n");
             close(new_sock); 
-            // kill(getpid(), SIGKILL);
             exit(0);
         }
-        // fp = popen(word, "r");
-        // while ( fgets( opt, SIZE, fp ) != NULL )/* read from command */
-        //     printf("%s", opt); /* print data */
-        // pclose( fp );
         printf("Output for the command %s\n", word);
         system(word);
     }
 }
 
 int main(){
-    // char *ip = "127.0.0.1";
+    char *ip = "127.0.0.1";
+    char *ip1 = "127.0.0.1";
     int portA = htons(8080);
     int portB = htons(8081);
     int eA, eB, count = 0;
@@ -70,15 +65,13 @@ int main(){
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = portA;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = inet_addr(ip);
 
     eA = bind(sockfdA, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
     if(eA < 0) {
         server_addr.sin_port = portB;
-        // int optval = 1;
-        // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEPORT, (char *)&optval, sizeof(optval));
-        // setsockopt(sockfdB, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+        server_addr.sin_addr.s_addr = inet_addr(ip1);
         flag = 1;
         eB = bind(sockfdB, (struct sockaddr*)&server_addr, sizeof(server_addr));
         printf("Binding successful with server B.\n");
@@ -112,35 +105,30 @@ int main(){
         {   
             count++;
             if(count>=1 && count<=5) {
-                // printf("Server A 1 %d\n", count);
                 new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
                 send(new_sock, "Welcome", sizeof("Welcome"), 0);
             }
             else if(count>=6 && count<=10){
-                // printf("Server B 1 %d\n", count);
                 new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
-                send(new_sock, "No", sizeof("No"), 0);
+                send(new_sock, "NA", sizeof("NA"), 0);
                 sleep(1);
                 close(new_sock);
                 printf("Transferred to Server B\n\n");
                 continue;
             }
             else if(count % 2 == 1){
-                // printf("Server A 2 %d\n", count);
                 new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
                 send(new_sock, "Welcome", sizeof("Welcome"), 0);
             }
             else{
-                // printf("Server B 2 %d\n", count);
                 new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);
-                send(new_sock, "No", sizeof("No"), 0);
+                send(new_sock, "NA", sizeof("NA"), 0);
                 sleep(1);
                 close(new_sock);
                 printf("Transferred to Server B\n\n");
                 continue;
             }
             printf("\nReceived a Client\n");
-            // printf("%d",new_sock);
             if(!fork()){
                 serviceClient(new_sock);
             }
@@ -152,7 +140,6 @@ int main(){
             new_sock = accept(sockfdB, (struct sockaddr*)&new_addr, &addr_size);
             send(new_sock, "Welcome", sizeof("Welcome"), 0);
             printf("\nReceived a Client\n");
-            // printf("%d",new_sock);
             if(!fork()){
                 serviceClient(new_sock);
             }
