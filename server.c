@@ -13,7 +13,7 @@
 
 #define SIZE 1024 //defaulting string size
 
-int serviceClient(int new_sock){
+int serviceClient(int new_sock){ //this function handles all clients
     char opt[SIZE]; //to store output generated
     int saved_stdout = dup(1); // this will be used to quit the process and close server
     dup2(new_sock, 0); //set input stream to new socket descriptor from STDIN
@@ -34,14 +34,14 @@ int serviceClient(int new_sock){
             close(new_sock); 
             exit(0);
         }
-        printf("Output for the command %s\n", word);
+        printf("\n");
         system(word); //execute the command request from client
     }
 }
 
 int main(){
-    char *ip = "127.0.0.1"; //setting ip address for serverA
-    char *ip1 = "127.0.0.1"; //setting ip address for serverB
+    char *ip = "192.168.2.124"; //setting ip address for serverA
+    char *ip1 = "192.168.2.171"; //setting ip address for serverB
     int portA = htons(8080); //setting port for serverA
     int portB = htons(8081); //setting port for serverB
     int eA, eB, count = 0; //initializing eA and eB to store binding output & count for load balancing
@@ -71,7 +71,7 @@ int main(){
 
     //if binding serverA fails connect to server B
     if(eA < 0) {
-        //change ip and port as per serve rB
+        //change ip and port as per serverB
         server_addr.sin_port = portB;
         server_addr.sin_addr.s_addr = inet_addr(ip1);
         flag = 1;
@@ -107,25 +107,25 @@ int main(){
     if (flag==0){ //flag 0 indicates always connect to serverA and 1 indicates always connect to serverB 
         while(1) //always keep looking for clients
         {   
-            count++; //to count number of clients connected
-            if(count>=1 && count<=5) { //if current count is between 1 to 5 connect to server A
-                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size); //accept the connection
+            new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size); //accpet the connection
+            if(count>=0 && count<5) { //if current count is between 0 to 4 connect to server A
+                count++; //to count number of clients connected
                 send(new_sock, "Welcome", sizeof("Welcome"), 0); //send welcome message(positive acknowledgement)
             }
-            else if(count>=6 && count<=10){//if current count is between 6 to 10 connect to server A
-                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size); //accpet the connection
+            else if(count>=5 && count<10){//if current count is between 5 to 9 connect to server A
+                count++; //to count number of clients connected
                 send(new_sock, "NA", sizeof("NA"), 0); //send NA negative acknowledgement
                 sleep(1); //sleep for a second
                 close(new_sock); //close the connection
                 printf("Transferred to Server B\n\n");
                 continue; //keep looking for new clients
             }
-            else if(count % 2 == 1){//even number of client connection after 10(eg 11,13,15, ...)
-                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size);//accept the connection if its nth odd number of connection
+            else if(count % 2 == 0){//even number of client connection after 10(eg 10,12,14, ...)
+                count++; //to count number of clients connected
                 send(new_sock, "Welcome", sizeof("Welcome"), 0); //send welcome message(positive acknowledgement)
             }
-            else{ //even number of client connection after 10 (eg 12,14,16, ...)
-                new_sock = accept(sockfdA, (struct sockaddr*)&new_addr, &addr_size); //accept the connection
+            else{ //odd number of client connection after 10 (eg 11,13,15, ...)
+                count++; //to count number of clients connected
                 send(new_sock, "NA", sizeof("NA"), 0); //send NA negative acknowledgement
                 sleep(1); //sleep for a second
                 close(new_sock);  //close the connection

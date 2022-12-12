@@ -14,13 +14,12 @@
 #define SIZE 1024 //defaulting string size
 
 int main(int argc, char *argv[]){
-    char *ip = "127.0.0.1"; //setting ip for serverA
-    char *ip1 = "127.0.0.1"; //setting ip for serverB
+    char *ip = "192.168.2.124"; //setting ip for serverA
+    char *ip1 = "192.168.2.171"; //setting ip for serverB
     int port = htons(8080); //setting port for serverA
     int port2 = htons(8081); //setting port for serverB
     int e; //to store connection op
     int sockfd; //to initialize socketA
-    int sockfd2; //to initialize socketB
     struct sockaddr_in server_addr; //to store connection address for server A
     sockfd = socket(AF_INET, SOCK_STREAM, 0); //creating socketA
     if(sockfd < 0) { //incase of any problem while initializing socket
