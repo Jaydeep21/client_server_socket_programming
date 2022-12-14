@@ -20,8 +20,8 @@
 
 int main(int argc, char *argv[]){
     // Change ip if running on two different devices and replace with device ip
-    char *ip1 = "192.168.2.124";
-    char *ip = "192.168.2.171";
+    char *ip1 = "127.0.0.1";
+    char *ip = "127.0.0.1";
     // Server A running on port 8080 and server B on port 8081
     int port = htons(8080);
     int port2 = htons(8081);
@@ -34,41 +34,40 @@ int main(int argc, char *argv[]){
         perror("Error in socket");
         exit(1);
     }
-    memset(&server_addr, 0, sizeof(server_addr)); // Clear value of variable
-    server_addr.sin_family = AF_INET;
+    memset(&server_addr, 0, sizeof(server_addr));  //clear pervious server memory
+    //setting up address for serverA
+    server_addr.sin_family = AF_INET; 
     server_addr.sin_port = port;
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
-    // Connect to server
+    //connect to serverA
     e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    if(e == -1) {
+    if(e == -1) { //if we get error while initializing socketA
         perror("Error in socket");
         exit(1);
     }
 	printf("Connected to Server.\n");
     
-    int n;
-    char input[SIZE];
-    char buffer[SIZE];
+    int n; //to receive the lenght of input message
+    char input[SIZE]; //to get input value
+    char buffer[SIZE]; //to get what acknowledgement from server  
     
-    // Receive acknowledgement
-    n = recv(sockfd, buffer, sizeof(buffer), 0);
-
-    // If acknowledgement is NA, close connection and connect with server B
-    if (strncmp(buffer, "NA", 2) == 0){
-        close(sockfd);
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        struct sockaddr_in server_addr2;
-        memset(&server_addr2, 0, sizeof(server_addr)); 
-        server_addr2.sin_family = AF_INET;
+    n = recv(sockfd, buffer, sizeof(buffer), 0); //receive the acknowledgement from server in buffer variable
+    if (strncmp(buffer, "NA", 2) == 0){ //incase of negative ack connect to server B
+        close(sockfd); //close previous socket
+        sockfd = socket(AF_INET, SOCK_STREAM, 0); //creating socketB
+        struct sockaddr_in server_addr2; //to store connection address for server B
+        memset(&server_addr2, 0, sizeof(server_addr)); //clear pervious server memory
+        //setting up address for serverB
+        server_addr2.sin_family = AF_INET; 
         server_addr2.sin_port = port2;
         server_addr2.sin_addr.s_addr = inet_addr(ip1);
-        e = connect(sockfd, (struct sockaddr*)&server_addr2, sizeof(server_addr2));
-        if(e == -1) {
+        e = connect(sockfd, (struct sockaddr*)&server_addr2, sizeof(server_addr2)); //connect to serverB
+        if(e == -1) { //if we get error while initializing socketB
             perror("Error in socket");
             exit(1);
         }
-    recv(sockfd, buffer, sizeof(buffer), 0);
+    recv(sockfd, buffer, sizeof(buffer), 0); //receive the message from server in buffer variable
     }
     while (1) {
 
@@ -82,9 +81,9 @@ int main(int argc, char *argv[]){
             close(sockfd);
             exit(0);
         }
-        sleep(1);
-        recv(sockfd, buffer, sizeof(buffer), 0); // Recv from server
-        printf("%s", buffer); // Display what is received
+        sleep(1); //to make sure that the quit message is read by server 
+        recv(sockfd, buffer, sizeof(buffer), 0); //get response from server in normal cases
+        printf("%s", buffer); //print the response
     }
     return 1;
 }
