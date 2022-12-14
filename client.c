@@ -13,25 +13,33 @@
 
 #define SIZE 1024
 
+// Use Colours for bash text
+#define SET_COLOUR    "\x1b[33m"
+#define RESET_COLOR   "\x1b[0m"
+
+
 int main(int argc, char *argv[]){
-    char *ip = "127.0.0.1";
-    char *ip1 = "127.0.0.1";
+    // Change ip if running on two different devices and replace with device ip
+    char *ip1 = "192.168.2.124";
+    char *ip = "192.168.2.171";
+    // Server A running on port 8080 and server B on port 8081
     int port = htons(8080);
     int port2 = htons(8081);
     int e;
+    // Define descriptor for socket
     int sockfd;
-    int sockfd2;
     struct sockaddr_in server_addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0) {
         perror("Error in socket");
         exit(1);
     }
-    memset(&server_addr, 0, sizeof(server_addr)); 
+    memset(&server_addr, 0, sizeof(server_addr)); // Clear value of variable
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = port;
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
+    // Connect to server
     e = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     if(e == -1) {
         perror("Error in socket");
@@ -43,7 +51,10 @@ int main(int argc, char *argv[]){
     char input[SIZE];
     char buffer[SIZE];
     
+    // Receive acknowledgement
     n = recv(sockfd, buffer, sizeof(buffer), 0);
+
+    // If acknowledgement is NA, close connection and connect with server B
     if (strncmp(buffer, "NA", 2) == 0){
         close(sockfd);
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -60,19 +71,20 @@ int main(int argc, char *argv[]){
     recv(sockfd, buffer, sizeof(buffer), 0);
     }
     while (1) {
-        memset(buffer, 0, SIZE);
+
+        memset(buffer, 0, SIZE); // Clear value of variable
         memset(input, 0, SIZE);
-        printf("chat> ");
-        fgets(input, sizeof(input), stdin);
-        write(sockfd, input, sizeof(input));
-        if (strncmp(input, "quit", 4) == 0)
+        printf(SET_COLOUR "command$ " RESET_COLOR);
+        fgets(input, sizeof(input), stdin); // Get input
+        write(sockfd, input, sizeof(input)); // Write to sserver
+        if (strncmp(input, "quit", 4) == 0) // close connection and exit if quit is entered
         {
             close(sockfd);
             exit(0);
         }
         sleep(1);
-        recv(sockfd, buffer, sizeof(buffer), 0);
-        printf("%s", buffer);
+        recv(sockfd, buffer, sizeof(buffer), 0); // Recv from server
+        printf("%s", buffer); // Display what is received
     }
     return 1;
 }
